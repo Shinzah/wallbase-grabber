@@ -87,7 +87,7 @@ public class Grabber
 
 	private void launchWallbaseDownloader(Properties properties) throws IOException
 	{
-		Runtime.getRuntime().exec(properties.getProperty("wallbase_app_path"));
+		Runtime.getRuntime().exec(properties.getProperty(Constants.CFG_WALLBASE_APP_PATH));
 	}
 
 	private List<SubscriptionRow> getSubscriptions() throws ClientProtocolException, IOException
@@ -100,7 +100,7 @@ public class Grabber
 		post.abort();
 		Document source = Jsoup.parse(htmlSource);
 
-		Elements elementsByClass = source.getElementsByClass("sub-catlist-row");
+		Elements elementsByClass = source.getElementsByClass(Constants.HTML_ELEMENT_CLASS_SUB_CATLIST_ROW);
 		ListIterator<Element> listIterator = elementsByClass.listIterator();
 
 		while(listIterator.hasNext())
@@ -124,29 +124,29 @@ public class Grabber
 		HttpPost post;
 		HttpResponse response;
 		
-		Elements newNumElement = currentElement.getElementsByClass("newnum");
+		Elements newNumElement = currentElement.getElementsByClass(Constants.HTML_ELEMENT_CLASS_NEWNUM);
 		if (newNumElement != null && !newNumElement.isEmpty())
 		{
 			String newNum = CharMatcher.DIGIT.retainFrom(newNumElement.text());
 
-			Element hrefElement = currentElement.getElementsByTag("a").get(0);
+			Element hrefElement = currentElement.getElementsByTag(Constants.HTML_ELEMENT_TAG_A).get(0);
 			String name = hrefElement.text();
 			
 			// Load the href URL to retrieve the correct URL for Wallbase Downloader
 			String url = null;
-			post = new HttpPost(hrefElement.attr("href"));
+			post = new HttpPost(hrefElement.attr(Constants.HTML_ELEMENT_ATTR_HREF));
 			response = client.execute(post);
 			String htmlSubscriptionSource = EntityUtils.toString(response.getEntity());
 			post.abort();
 			Document sourceSubscriptions = Jsoup.parse(htmlSubscriptionSource);
-			Elements urlElements = sourceSubscriptions.getElementById("subscr_list").getElementsByClass("header").get(0).getElementsByTag("a");
+			Elements urlElements = sourceSubscriptions.getElementById(Constants.HTML_ELEMENT_ID_SUBSCR_LIST).getElementsByClass(Constants.HTML_ELEMENT_CLASS_HEADER).get(0).getElementsByTag(Constants.HTML_ELEMENT_TAG_A);
 			ListIterator<Element> urlElementsIterator = urlElements.listIterator();
 			while (urlElementsIterator.hasNext())
 			{
 				Element currentElementURL = urlElementsIterator.next();
-				if (currentElementURL.attr("href").startsWith("tags/info/"))
+				if (currentElementURL.attr(Constants.HTML_ELEMENT_ATTR_HREF).startsWith("tags/info/"))
 				{
-					url = new StringBuilder("http://wallbase.cc/").append(currentElementURL.attr("href")).toString();
+					url = new StringBuilder("http://wallbase.cc/").append(currentElementURL.attr(Constants.HTML_ELEMENT_ATTR_HREF)).toString();
 					break;
 				}
 			}
@@ -165,8 +165,8 @@ public class Grabber
 
 		List<NameValuePair> lstParam = new ArrayList<NameValuePair>();
 
-		lstParam.add(new BasicNameValuePair("usrname",prop.getProperty("login")));
-		lstParam.add(new BasicNameValuePair("pass",prop.getProperty("passwd")));
+		lstParam.add(new BasicNameValuePair("usrname",prop.getProperty(Constants.CFG_LOGIN)));
+		lstParam.add(new BasicNameValuePair("pass",prop.getProperty(Constants.CFG_PASSWD)));
 		lstParam.add(new BasicNameValuePair("nopass_email",""));
 		lstParam.add(new BasicNameValuePair("nopass","0"));
 		post.setEntity(new UrlEncodedFormEntity(lstParam));
