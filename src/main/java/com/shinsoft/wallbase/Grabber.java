@@ -52,10 +52,13 @@ public class Grabber
 		this.client = new DefaultHttpClient();
 	}
 
-	public void proceed() throws IOException
+	public void proceed() throws IOException, InterruptedException
 	{
 		// Init Properties
 		Properties properties = initProperties();
+
+		// Run Wallbase Downloader
+		launchWallbaseDownloader(properties);
 
 		// Login Wallbase
 		login(properties);
@@ -69,17 +72,15 @@ public class Grabber
 		else
 		{
 			System.out.println("New wallpapers for " + subscriptions.size() + " subscriptions found ...");
-			
-			// Run Wallbase Downloader
-			launchWallbaseDownloader(properties);
-	
+
 			// Copy Paste it into clipboard
 			for (SubscriptionRow currentRow : subscriptions)
 			{
-				System.out.println(currentRow.getName()+" have "+currentRow.getNbNew()+" new wallpapers.");
+				System.out.println(currentRow.getName()+" have "+currentRow.getNbNew()+" new wallpapers. (URL= "+currentRow.getUrl()+")");
 				copyToClipboard(currentRow.getUrl());
+				Thread.sleep(500);
 			}
-			
+
 			System.out.println("Processing done !");
 		}
 
@@ -118,12 +119,12 @@ public class Grabber
 
 	private SubscriptionRow buildSubscriptionRow(
 					Element currentElement)
-					throws IOException,
-					ClientProtocolException
-	{
+									throws IOException,
+									ClientProtocolException
+									{
 		HttpPost post;
 		HttpResponse response;
-		
+
 		Elements newNumElement = currentElement.getElementsByClass(Constants.HTML_ELEMENT_CLASS_NEWNUM);
 		if (newNumElement != null && !newNumElement.isEmpty())
 		{
@@ -131,7 +132,7 @@ public class Grabber
 
 			Element hrefElement = currentElement.getElementsByTag(Constants.HTML_ELEMENT_TAG_A).get(0);
 			String name = hrefElement.text();
-			
+
 			// Load the href URL to retrieve the correct URL for Wallbase Downloader
 			String url = null;
 			post = new HttpPost(hrefElement.attr(Constants.HTML_ELEMENT_ATTR_HREF));
@@ -157,7 +158,7 @@ public class Grabber
 		{
 			return null;
 		}
-	}
+									}
 
 	private void login(Properties prop) throws ClientProtocolException, IOException
 	{
@@ -187,8 +188,8 @@ public class Grabber
 	private void copyToClipboard(String url)
 	{
 		StringSelection stringSelection = new StringSelection(url);
-		Clipboard clipboard = Toolkit.getDefaultToolkit ().getSystemClipboard ();
-		clipboard.setContents (stringSelection, null);
+		Clipboard clipboard = Toolkit.getDefaultToolkit ().getSystemClipboard();
+		clipboard.setContents(stringSelection, null);
 	}
 }
 

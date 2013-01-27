@@ -26,6 +26,10 @@ public class Wallbase
 		{
 			e.printStackTrace();
 		}
+		catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
 
